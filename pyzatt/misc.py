@@ -75,7 +75,7 @@ def decode_time(enc_t_arr):
     hour = int((enc_t / 3600.) % 24)  # hours
     day = int(((enc_t / (3600. * 24.)) % 31)) + 1  # day
     month = int(((enc_t / (3600. * 24. * 31.)) % 12)) + 1  # month
-    year = int((enc_t / (3600. * 24.)) / 365) + 2000  # year
+    year = int((enc_t / (3600. * 24.)) / 365) + 1999  # year
 
     return datetime.datetime(year, month, day, hour, mins, secs)
 
