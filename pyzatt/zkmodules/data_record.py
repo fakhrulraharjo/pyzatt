@@ -53,6 +53,47 @@ class DataRecordMixin:
 
             i += 40
 
+    def read_att_log_alt(self):
+        """
+        Requests the attendance log.
+
+        :return: None. Stores the attendance log entries
+            in the att_log attribute.
+        """
+        self.send_command(cmd=DEFS.CMD_ATTLOG_RRQ,
+                          data=bytearray.fromhex('010d000000000000000000'))
+        self.recv_long_reply()
+
+        # clear the attendance log attribute
+        self.att_log = []
+
+        # get number of log entries
+        att_count = struct.unpack('<H', self.last_payload_data[0:2])[0]/40
+        att_count = int(att_count)
+
+        # skip the size of log and zeros
+        i = 4
+
+        # extract the fields from each log entry
+        for idx in range(att_count):
+            # user internal index
+            user_sn = struct.unpack('<H', self.last_payload_data[i:i+2])[0]
+            # user id
+            user_id = self.last_payload_data[i+2:i+11].decode('ascii').\
+                replace('\x00', '')
+            # verification type
+            ver_type = self.last_payload_data[i+26]
+            # time of the record
+            att_time = misc.decode_time(self.last_payload_data[i+27:i+31])
+            # verification state
+            ver_state = self.last_payload_data[i+31]
+
+            # append attendance entry
+            self.append_att_entry(user_sn, user_id, ver_type,
+                                  att_time, ver_state)
+
+            i += 40
+
     def clear_att_log(self):
         """
         Delete the attendance log record on the machine.
